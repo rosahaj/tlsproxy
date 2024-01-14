@@ -2,6 +2,47 @@
 
 HTTP proxy with per-request uTLS fingerprint mimicry and upstream proxy tunneling. Currently WIP.
 
+Built on top of [uTLS](https://github.com/refraction-networking/utls) and [goproxy](https://github.com/elazarl/goproxy/). Inspired by [ja3proxy](https://github.com/LyleMi/ja3proxy).
+
+## Usage
+
+### Building from source
+
+```bash
+git clone https://github.com/rosahaj/tlsproxy
+cd ja3proxy
+go build
+
+# Start proxy
+./tlsproxy -client Chrome-120
+# Make requests
+curl --cacert cert.pem --proxy http://localhost:8080 https://www.example.com
+```
+
+Pre-built binaries are available in the [Releases](https://github.com/rosahaj/tlsproxy/releases) section.
+
+### Using docker CLI
+
+```bash
+docker run \
+      -v ./credentials:/app/credentials \
+      -p 8080:8080 \
+      ghcr.io/rosahaj/tlsproxy:latest \
+      -cert /app/credentials/cert.pem \
+      -key /app/credentials/key.pem \
+      -client Chrome-120
+```
+
+### Using docker compose
+
+See [`compose.yaml`](https://github.com/rosahaj/tlsproxy/blob/master/compose.yaml)
+
+```bash
+docker compose up -d
+```
+
+### CLI usage
+
 ```
 Usage of ./tlsproxy:
   -addr string
