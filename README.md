@@ -1,21 +1,21 @@
 # tlsproxy
 
-Proof-of-concept http proxy for ja3 fingerprint customization and proxy chaining. Not actively mantained.
+HTTP proxy with per-request uTLS fingerprint mimicry and upstream proxy tunneling. Currently WIP.
 
 ```
 Usage of ./tlsproxy:
   -addr string
-        proxy listen address
-  -ca string
-        tls ca certificate (generated automatically if not present) (default "ca.pem")
-  -client-profile string
-        default client profile (can be overriden through x-tlsproxy-client-profile header)
+        Proxy listen address
+  -cert string
+        TLS CA certificate (generated automatically if not present) (default "cert.pem")
+  -client string
+        Default utls clientHelloID (can be overriden through x-tlsproxy-client header) (default "Chrome-120")
   -key string
-        tls ca key (generated automatically if not present) (default "key.pem")
+        TLS CA key (generated automatically if not present) (default "key.pem")
   -port string
-        proxy listen port (default "8080")
-  -upstream-proxy string
-        default upstream proxy (can be overriden through x-tlsproxy-upstream-proxy header)
+        Proxy listen port (default "8080")
+  -upstream string
+        Default upstream proxy (can be overriden through x-tlsproxy-upstream header)
   -verbose
-        enable verbose logging
+        Enable verbose logging
 ```

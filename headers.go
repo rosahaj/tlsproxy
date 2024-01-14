@@ -3,21 +3,21 @@ package main
 import "net/http"
 
 const (
-	UpStreamProxyHeader = "x-tlsproxy-upstream-proxy"
-	ClientProfileHeader = "x-tlsproxy-client-profile"
+	UpStreamProxyHeader = "x-tlsproxy-upstream"
+	ClientProfileHeader = "x-tlsproxy-client"
 )
 
 var CustomHeaders = []string{UpStreamProxyHeader, ClientProfileHeader}
 
 type ProxyConfig struct {
+	client        string
 	upstreamProxy string
-	clientProfile string
 }
 
 func parseCustomHeaders(headers *http.Header) ProxyConfig {
 	return ProxyConfig{
 		upstreamProxy: headers.Get(UpStreamProxyHeader),
-		clientProfile: headers.Get(ClientProfileHeader),
+		client:        headers.Get(ClientProfileHeader),
 	}
 }
 

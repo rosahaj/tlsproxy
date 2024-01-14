@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"github.com/elazarl/goproxy"
+
+	cfsr "github.com/cloudflare/cfssl/csr"
+	"github.com/cloudflare/cfssl/initca"
 )
 
 func fileExists(filename string) bool {
@@ -28,23 +31,61 @@ func setGoproxyCA(tlsCert tls.Certificate) {
 }
 
 func loadCA() {
-	if fileExists(Flags.ca) && fileExists(Flags.key) {
-		tlsCert, err := tls.LoadX509KeyPair(Flags.ca, Flags.key)
+	if fileExists(Flags.cert) && fileExists(Flags.key) {
+		tlsCert, err := tls.LoadX509KeyPair(Flags.cert, Flags.key)
 		if err != nil {
-			log.Fatal("Unable to load ca", err)
+			log.Fatal("Unable to load CA certificate and key", err)
 		}
 
 		setGoproxyCA(tlsCert)
 	} else {
-		if fileExists(Flags.ca) {
+		if fileExists(Flags.cert) {
 			log.Fatalf("CA certificate exists, but found no corresponding key at %s", Flags.key)
 		} else if fileExists(Flags.key) {
-			log.Fatalf("CA key exists, but found no corresponding certificate at %s", Flags.ca)
+			log.Fatalf("CA key exists, but found no corresponding certificate at %s", Flags.cert)
 		}
 
-		// TODO
-		// log.Println("CA does not exist, generating certificate and key")
-		log.Println("No CA certificate and key found, please generate")
-		os.Exit(-1)
+		log.Println("No CA found, generating certificate and key")
+		tlsCert, err := generateCA()
+		if err != nil {
+			log.Fatal("Unable to generate CA certificate and key", err)
+		}
+
+		setGoproxyCA(tlsCert)
 	}
+}
+
+func generateCA() (tls.Certificate, error) {
+	csr := cfsr.CertificateRequest{
+		CN:         "tlsproxy CA",
+		KeyRequest: cfsr.NewKeyRequest(),
+	}
+
+	certPEM, _, keyPEM, err := initca.New(&csr)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	caOut, err := os.Create(Flags.cert)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+	defer caOut.Close()
+	_, err = caOut.Write(certPEM)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	keyOut, err := os.OpenFile(Flags.key, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+	defer keyOut.Close()
+
+	_, err = keyOut.Write(keyPEM)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	return tls.X509KeyPair(certPEM, keyPEM)
 }

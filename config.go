@@ -3,55 +3,61 @@ package main
 import (
 	"log"
 	"net/url"
+	"strings"
 
-	"github.com/bogdanfinn/tls-client/profiles"
+	utls "github.com/refraction-networking/utls"
 )
 
 type CLIFlags struct {
 	addr          string
 	port          string
-	ca            string
+	cert          string
 	key           string
 	upstreamProxy string
-	clientProfile string
+	client        string
 	verbose       bool
 }
 
 var (
 	Flags                CLIFlags
-	DefaultClientProfile = &struct {
-		isSet         bool
-		clientProfile profiles.ClientProfile
-	}{}
-	DefaultUpstreamProxy string
+	DefaultClientHelloID utls.ClientHelloID
+	DefaultUpstreamProxy *url.URL
 )
 
-func setDefaultClientProfile(clientProfile string) {
-	if loadedClientProfile, ok := profiles.MappedTLSClients[clientProfile]; ok {
-		DefaultClientProfile.isSet = true
-		DefaultClientProfile.clientProfile = loadedClientProfile
-	} else {
-		log.Fatalf("Invalid client profile: %s", clientProfile)
+func getClientHelloID(client string) (utls.ClientHelloID, bool) {
+	clientArr := strings.Split(client, "-")
+	if len(clientArr) != 2 {
+		return utls.ClientHelloID{}, false
 	}
+
+	return utls.ClientHelloID{
+		Client:  clientArr[0],
+		Version: clientArr[1],
+		Seed:    nil,
+		Weights: nil,
+	}, true
 }
 
-func isValidUrl(inputUrl string) bool {
-	_, err := url.Parse(inputUrl)
-	return err == nil
+func setDefaultClientHelloID(client string) {
+	clientHelloId, ok := getClientHelloID(client)
+	if !ok {
+		log.Fatalf("Invalid client format: %s", client)
+	}
+
+	DefaultClientHelloID = clientHelloId
 }
 
 func setDefaultUpstreamProxy(upstreamProxy string) {
-	if isValidUrl(upstreamProxy) {
-		DefaultUpstreamProxy = upstreamProxy
-	} else {
+	proxyUrl, err := url.Parse(upstreamProxy)
+	if err != nil {
 		log.Fatalf("Invalid upstream proxy: %s", upstreamProxy)
 	}
+
+	DefaultUpstreamProxy = proxyUrl
 }
 
 func loadDefaultProxyConfig() {
-	if len(Flags.clientProfile) > 0 {
-		setDefaultClientProfile(Flags.clientProfile)
-	}
+	setDefaultClientHelloID(Flags.client)
 
 	if len(Flags.upstreamProxy) > 0 {
 		setDefaultUpstreamProxy(Flags.upstreamProxy)
