@@ -1,0 +1,18 @@
+services:
+  ja3proxy:
+    image: ghcr.io/rosahaj/tlsproxy:latest
+    build: .
+    entrypoint:
+      [
+        "/app/tlsproxy",
+        "-cert",
+        "/app/credentials/cert.pem",
+        "-key",
+        "/app/credentials/key.pem",
+        "-client",
+        "Chrome-120"
+      ]
+    ports:
+      - 8080:8080
+    volumes:
+      - ./credentials:/app/credentials

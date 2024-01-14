@@ -1,0 +1,40 @@
+name: Release
+on:
+  release:
+    types: [created]
+permissions:
+  contents: write
+  packages: write
+jobs:
+  releases-matrix:
+    name: Release tlsproxy binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/amd64, linux/arm64,
+        # windows/amd64, windows/arm64, darwin/amd64, darwin/arm64
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          binary_name: "tlsproxy"
+  docker-image:
+    name: Build and push Docker image to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and Push Container to ghcr.io
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: tlsproxy
+          registry: ghcr.io
+          multiplatform: true
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+          addLatest: true
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
