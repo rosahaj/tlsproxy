@@ -1,5 +1,5 @@
 services:
-  ja3proxy:
+  tlsproxy:
     image: ghcr.io/rosahaj/tlsproxy:latest
     build: .
     entrypoint:
