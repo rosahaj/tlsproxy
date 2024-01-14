@@ -17,7 +17,7 @@ func main() {
 	flag.StringVar(&Flags.port, "port", "8080", "Proxy listen port")
 	flag.StringVar(&Flags.cert, "cert", "cert.pem", "TLS CA certificate (generated automatically if not present)")
 	flag.StringVar(&Flags.key, "key", "key.pem", "TLS CA key (generated automatically if not present)")
-	flag.StringVar(&Flags.upstreamProxy, "upstream", "", "Default upstream proxy (can be overriden through x-tlsproxy-upstream header)")
+	flag.StringVar(&Flags.upstreamProxy, "upstream", "", "Default upstream proxy prefixed by \"socks5://\" (can be overriden through x-tlsproxy-upstream header)")
 	flag.StringVar(&Flags.client, "client", "Chrome-120", "Default utls clientHelloID (can be overriden through x-tlsproxy-client header)")
 	flag.BoolVar(&Flags.verbose, "verbose", false, "Enable verbose logging")
 	flag.Parse()

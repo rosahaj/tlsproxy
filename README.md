@@ -56,7 +56,7 @@ Usage of ./tlsproxy:
   -port string
         Proxy listen port (default "8080")
   -upstream string
-        Default upstream proxy (can be overriden through x-tlsproxy-upstream header)
+        Default upstream proxy prefixed by "socks5://" (can be overriden through x-tlsproxy-upstream header)
   -verbose
         Enable verbose logging
 ```
